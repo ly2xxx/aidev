@@ -2,6 +2,8 @@
 
 This directory contains two MCP (Model Context Protocol) servers that implement a development crew system as described in the `mcp-based-dev-crew.md` design document.
 
+[![Claude + Gemini + Docker MCP = My GenAI Dev Team](https://img.youtube.com/vi/djqkec6vBE4/hqdefault.jpg)](https://m.youtube.com/watch?v=djqkec6vBE4)
+
 ## 🏗️ Architecture
 
 ```
@@ -228,6 +230,7 @@ To extend or modify the MCP servers:
 3. Test your changes using the `test_servers.py` script
 4. Update this README with any new functionality
 
-## 📄 License
-
-This implementation is based on the MCP-based GenAI Development Crew design and is intended for development and educational purposes.
+## 📄 External References
+1. Claude Code (WSL): https://itecsonline.com/post/how-to-install-claude-code-on-windows
+2. Gemini CLI (WSL): https://dev.to/auden/google-gemini-cli-tutorial-how-to-install-and-use-it-with-images-4phb
+3. Docker MCP Toolkit: https://dev.to/pradumnasaraf/run-mcp-servers-in-seconds-with-docker-1ik5googlgoog
