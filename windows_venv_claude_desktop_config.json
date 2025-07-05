@@ -1,18 +1,30 @@
 {
-  "mcpServers": {
-    "claude-code-developer": {
-      "command": "H:\\code\\yl\\aidev\\mcp\\.venv\\Scripts\\python.exe",
-      "args": ["H:\\code\\yl\\aidev\\mcp\\claude-code-developer\\server.py"],
-      "env": {
-        "PYTHONPATH": "H:\\code\\yl\\aidev\\mcp"
-      }
-    },
-    "gemini-qa-agent": {
-      "command": "H:\\code\\yl\\aidev\\mcp\\.venv\\Scripts\\python.exe", 
-      "args": ["H:\\code\\yl\\aidev\\mcp\\gemini-qa-agent\\server.py"],
-      "env": {
-        "PYTHONPATH": "H:\\code\\yl\\aidev\\mcp"
-      }
-    }
-  }
+	"mcpServers": {
+		"claude-code-developer": {
+		  "command": "H:\\code\\yl\\aidev\\.venv\\Scripts\\python.exe",
+		  "args": ["H:\\code\\yl\\aidev\\claude-code-developer\\server.py"],
+		  "env": {
+			"PYTHONPATH": "H:\\code\\yl\\aidev"
+		  }
+		},
+		"gemini-qa-agent": {
+		  "command": "H:\\code\\yl\\aidev\\.venv\\Scripts\\python.exe", 
+		  "args": ["H:\\code\\yl\\aidev\\gemini-qa-agent\\server.py"],
+		  "env": {
+			"PYTHONPATH": "H:\\code\\yl\\aidev"
+		  }
+		},
+		"MCP_DOCKER": {
+			"command": "docker",
+			"args": [
+				"mcp",
+				"gateway",
+				"run"
+			],
+			"env": {
+				"LOCALAPPDATA": "C:\\Users\\[your widnows user]\\AppData\\Local",
+				"ProgramFiles": "C:\\Program Files"
+			}
+		}
+	}
 }

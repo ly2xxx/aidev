@@ -57,12 +57,12 @@ async def main():
     
     # Test both servers
     claude_result = await test_mcp_server(
-        "/mnt/h/code/yl/aidev/mcp/claude-code-developer/server.py",
+        "/mnt/h/code/yl/aidev/claude-code-developer/server.py",
         "Claude Code Developer MCP Server"
     )
     
     gemini_result = await test_mcp_server(
-        "/mnt/h/code/yl/aidev/mcp/gemini-qa-agent/server.py", 
+        "/mnt/h/code/yl/aidev/gemini-qa-agent/server.py", 
         "Gemini QA Agent MCP Server"
     )
     

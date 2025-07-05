@@ -2,16 +2,16 @@
   "mcpServers": {
     "claude-code-developer": {
       "command": "python",
-      "args": ["H:\\code\\yl\\aidev\\mcp\\claude-code-developer\\server.py"],
+      "args": ["H:\\code\\yl\\aidev\\claude-code-developer\\server.py"],
       "env": {
-        "PYTHONPATH": "H:\\code\\yl\\aidev\\mcp"
+        "PYTHONPATH": "H:\\code\\yl\\aidev"
       }
     },
     "gemini-qa-agent": {
       "command": "python", 
-      "args": ["H:\\code\\yl\\aidev\\mcp\\gemini-qa-agent\\server.py"],
+      "args": ["H:\\code\\yl\\aidev\\gemini-qa-agent\\server.py"],
       "env": {
-        "PYTHONPATH": "H:\\code\\yl\\aidev\\mcp"
+        "PYTHONPATH": "H:\\code\\yl\\aidev"
       }
     }
   }
