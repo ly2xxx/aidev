@@ -27,7 +27,8 @@
 			],
 			"env": {
 				"LOCALAPPDATA": "C:\\Users\\HP\\AppData\\Local",
-				"ProgramFiles": "C:\\Program Files"
+				"ProgramFiles": "C:\\Program Files",
+				"ProgramData": "C:\\ProgramData"
 			}
 		}
 	}
