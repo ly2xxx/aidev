@@ -232,5 +232,11 @@ To extend or modify the MCP servers:
 
 ## 📄 External References
 1. Claude Code (WSL): https://itecsonline.com/post/how-to-install-claude-code-on-windows
+
+[![Claude Code](https://img.youtube.com/vi/T_IYHx-9VGU/hqdefault.jpg)](https://m.youtube.com/watch?v=T_IYHx-9VGU)
+
 2. Gemini CLI (WSL): https://dev.to/auden/google-gemini-cli-tutorial-how-to-install-and-use-it-with-images-4phb
-3. Docker MCP Toolkit: https://dev.to/pradumnasaraf/run-mcp-servers-in-seconds-with-docker-1ik5googlgoog
+
+[![Gemini CLI](https://img.youtube.com/vi/_l6WvbM1TbI/hqdefault.jpg)](https://m.youtube.com/watch?v=_l6WvbM1TbI)
+
+3. Docker MCP Toolkit: https://dev.to/pradumnasaraf/run-mcp-servers-in-seconds-with-docker-1ik5
