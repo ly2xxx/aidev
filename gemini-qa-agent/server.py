@@ -12,11 +12,22 @@ import os
 import glob
 import tempfile
 from typing import Any, Dict, List
+from pathlib import Path
+from dotenv import load_dotenv
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp.types import Tool, TextContent
 
+# Load environment variables from aidev directory
+env_path = Path(__file__).parent.parent / ".env"
+load_dotenv(env_path)
+
 server = Server("gemini-qa-agent")
+
+# Get Gemini API key from environment
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+if not GEMINI_API_KEY:
+    raise ValueError("GEMINI_API_KEY not found in environment variables. Please check your .env file.")
 
 @server.list_tools()
 async def list_tools() -> List[Tool]:
@@ -202,12 +213,16 @@ Provide a thorough analysis with specific recommendations for improvement."""
         
         prompt = prompts.get(review_type, prompts["general"])
         
-        # Call Gemini CLI
+        # Call Gemini CLI with API key
+        env = os.environ.copy()
+        env["GEMINI_API_KEY"] = GEMINI_API_KEY
+        
         result = subprocess.run(
             ["gemini", "--prompt", prompt], 
             capture_output=True, 
             text=True, 
-            timeout=90
+            timeout=90,
+            env=env
         )
         
         if result.returncode == 0:
@@ -255,11 +270,15 @@ Source Code:
 
 Generate complete, runnable test code with proper structure and organization."""
         
+        env = os.environ.copy()
+        env["GEMINI_API_KEY"] = GEMINI_API_KEY
+        
         result = subprocess.run(
             ["gemini", "--prompt", prompt],
             capture_output=True,
             text=True,
-            timeout=120
+            timeout=120,
+            env=env
         )
         
         if result.returncode == 0:
@@ -350,11 +369,15 @@ Code:
 
 Provide specific security findings with severity levels and remediation recommendations."""
                 
+                env = os.environ.copy()
+                env["GEMINI_API_KEY"] = GEMINI_API_KEY
+                
                 result = subprocess.run(
                     ["gemini", "--prompt", prompt],
                     capture_output=True,
                     text=True,
-                    timeout=60
+                    timeout=60,
+                    env=env
                 )
                 
                 if result.returncode == 0:
@@ -408,11 +431,15 @@ Code:
 
 Provide specific performance improvement recommendations with before/after examples where applicable."""
         
+        env = os.environ.copy()
+        env["GEMINI_API_KEY"] = GEMINI_API_KEY
+        
         result = subprocess.run(
             ["gemini", "--prompt", prompt],
             capture_output=True,
             text=True,
-            timeout=90
+            timeout=90,
+            env=env
         )
         
         if result.returncode == 0:
@@ -517,11 +544,15 @@ Please provide a comprehensive analysis covering:
 
 Provide actionable recommendations with priority levels."""
         
+        env = os.environ.copy()
+        env["GEMINI_API_KEY"] = GEMINI_API_KEY
+        
         result = subprocess.run(
             ["gemini", "--prompt", prompt],
             capture_output=True,
             text=True,
-            timeout=150
+            timeout=150,
+            env=env
         )
         
         if result.returncode == 0:
@@ -545,12 +576,16 @@ async def ask_gemini_handler(args: Dict[str, Any]) -> List[TextContent]:
         if include_all_files:
             cmd.extend(["--all_files"])
         
-        # Execute Gemini CLI
+        # Execute Gemini CLI with API key
+        env = os.environ.copy()
+        env["GEMINI_API_KEY"] = GEMINI_API_KEY
+        
         result = subprocess.run(
             cmd,
             capture_output=True,
             text=True,
-            timeout=120
+            timeout=120,
+            env=env
         )
         
         if result.returncode == 0:

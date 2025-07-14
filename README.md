@@ -240,3 +240,5 @@ To extend or modify the MCP servers:
 [![Gemini CLI](https://img.youtube.com/vi/_l6WvbM1TbI/hqdefault.jpg)](https://m.youtube.com/watch?v=_l6WvbM1TbI)
 
 3. Docker MCP Toolkit: https://dev.to/pradumnasaraf/run-mcp-servers-in-seconds-with-docker-1ik5
+
+![Claude Code](image/README/claude.png)
