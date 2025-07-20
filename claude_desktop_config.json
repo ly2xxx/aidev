@@ -1,21 +1,21 @@
 {
 	"mcpServers": {
 		"claude-code-developer": {
-			"command": "H:\\code\\yl\\aidev\\.venv\\Scripts\\python.exe",
+			"command": "C:\\code\\aidev\\.venv\\Scripts\\python.exe",
 			"args": [
-				"H:\\code\\yl\\aidev\\claude-code-developer\\server.py"
+				"C:\\code\\aidev\\claude-code-developer\\server.py"
 			],
 			"env": {
-				"PYTHONPATH": "H:\\code\\yl\\aidev"
+				"PYTHONPATH": "C:\\code\\aidev\\"
 			}
 		},
 		"gemini-qa-agent": {
-			"command": "H:\\code\\yl\\aidev\\.venv\\Scripts\\python.exe",
+			"command": "C:\\code\\aidev\\.venv\\Scripts\\python.exe",
 			"args": [
-				"H:\\code\\yl\\aidev\\gemini-qa-agent\\server.py"
+				"C:\\code\\aidev\\gemini-qa-agent\\server.py"
 			],
 			"env": {
-				"PYTHONPATH": "H:\\code\\yl\\aidev"
+				"PYTHONPATH": "C:\\code\\aidev\\"
 			}
 		},
 		"MCP_DOCKER": {
@@ -26,10 +26,18 @@
 				"run"
 			],
 			"env": {
-				"LOCALAPPDATA": "C:\\Users\\HP\\AppData\\Local",
+				"LOCALAPPDATA": "C:\\Users\\xx\\AppData\\Local",
 				"ProgramFiles": "C:\\Program Files",
 				"ProgramData": "C:\\ProgramData"
 			}
+		},
+		"grep-code": {
+		  "command": "npx",
+		  "args": [
+			"-y",
+			"mcp-remote",
+			"https://mcp.grep.app/"
+		  ]
 		}
 	}
 }

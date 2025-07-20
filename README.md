@@ -235,8 +235,12 @@ To extend or modify the MCP servers:
 
 [![Claude Code](https://img.youtube.com/vi/T_IYHx-9VGU/hqdefault.jpg)](https://m.youtube.com/watch?v=T_IYHx-9VGU)
 
+https://www.linkedin.com/pulse/claude-code-complete-guide-official-instructions-best-gregorovi%C4%8D-m17ee?utm_source=share&utm_medium=member_android&utm_campaign=share_via
+
 2. Gemini CLI (WSL): https://dev.to/auden/google-gemini-cli-tutorial-how-to-install-and-use-it-with-images-4phb
 
 [![Gemini CLI](https://img.youtube.com/vi/_l6WvbM1TbI/hqdefault.jpg)](https://m.youtube.com/watch?v=_l6WvbM1TbI)
+
+https://www.linkedin.com/pulse/gemini-cli-crash-course-from-npm-i-1-million-token-30-gregorovi%C4%8D-cgdme?utm_source=share&utm_medium=member_android&utm_campaign=share_via
 
 3. Docker MCP Toolkit: https://dev.to/pradumnasaraf/run-mcp-servers-in-seconds-with-docker-1ik5
