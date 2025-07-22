@@ -244,3 +244,5 @@ https://www.linkedin.com/pulse/claude-code-complete-guide-official-instructions-
 https://www.linkedin.com/pulse/gemini-cli-crash-course-from-npm-i-1-million-token-30-gregorovi%C4%8D-cgdme?utm_source=share&utm_medium=member_android&utm_campaign=share_via
 
 3. Docker MCP Toolkit: https://dev.to/pradumnasaraf/run-mcp-servers-in-seconds-with-docker-1ik5
+
+4. Grep Github :https://vercel.com/blog/grep-a-million-github-repositories-via-mcp(claude mcp add --transport http grep https://mcp.grep.app)
