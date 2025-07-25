@@ -2,6 +2,7 @@
 """
 Gemini CLI MCP Server - QA Agent
 Handles code review, testing, and quality assurance tasks using Gemini CLI
+Fixed for WSL2 Ubuntu environment with proper subprocess handling
 """
 
 import asyncio
@@ -11,12 +12,131 @@ import sys
 import os
 import glob
 import tempfile
+import logging
+import shutil
 from typing import Any, Dict, List
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp.types import Tool, TextContent
 
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
 server = Server("gemini-qa-agent")
+
+def run_gemini_command(args: List[str], working_dir: str = None, timeout: int = 120) -> subprocess.CompletedProcess:
+    """
+    Robust Gemini CLI wrapper for WSL2 Ubuntu environment.
+    Handles proper PATH setup and environment for npm-installed gemini CLI.
+    
+    Args:
+        args: List of arguments to pass to gemini CLI (excluding 'gemini' itself)
+        working_dir: Working directory for the command (defaults to user home)
+        timeout: Command timeout in seconds
+        
+    Returns:
+        subprocess.CompletedProcess result
+        
+    Raises:
+        FileNotFoundError: If gemini CLI cannot be found
+        subprocess.TimeoutExpired: If command times out
+    """
+    
+    # Ensure we have the user's full environment
+    env = os.environ.copy()
+    
+    # Add npm global bin to PATH - this is crucial for WSL2
+    npm_bin_path = '/home/user/.npm-global/bin'
+    current_path = env.get('PATH', '')
+    if npm_bin_path not in current_path:
+        env['PATH'] = npm_bin_path + ':' + current_path
+    
+    # Also add common npm paths as fallbacks
+    additional_paths = [
+        '/usr/local/bin',
+        '/usr/bin',
+        '/bin',
+        os.path.expanduser('~/.npm-global/bin'),
+        '/home/user/.local/bin'
+    ]
+    
+    for path in additional_paths:
+        if path not in env['PATH']:
+            env['PATH'] = path + ':' + env['PATH']
+    
+    # Try multiple possible gemini executable locations
+    gemini_locations = [
+        '/home/user/.npm-global/bin/gemini',
+        '/usr/local/bin/gemini',
+        '/usr/bin/gemini',
+        os.path.expanduser('~/.npm-global/bin/gemini'),
+        shutil.which('gemini')  # Let system find it
+    ]
+    
+    gemini_path = None
+    for location in gemini_locations:
+        if location and os.path.exists(location) and os.access(location, os.X_OK):
+            gemini_path = location
+            break
+    
+    # If still not found, try using shutil.which with updated PATH
+    if not gemini_path:
+        # Update PATH temporarily to find gemini
+        old_path = os.environ.get('PATH', '')
+        os.environ['PATH'] = env['PATH']
+        try:
+            gemini_path = shutil.which('gemini')
+        finally:
+            os.environ['PATH'] = old_path
+    
+    if not gemini_path:
+        logger.error(f"Gemini CLI not found. Searched locations: {gemini_locations}")
+        logger.error(f"Current PATH: {env['PATH']}")
+        raise FileNotFoundError("Gemini CLI executable not found. Please ensure it's installed via npm.")
+    
+    # Set working directory - use user home if not specified
+    if working_dir is None:
+        working_dir = os.path.expanduser('~')
+        if not os.path.exists(working_dir):
+            working_dir = '/home/user'
+    
+    # Build full command with gemini path
+    full_cmd = [gemini_path] + args
+    
+    logger.info(f"Executing Gemini command: {' '.join(full_cmd[:2])}... (truncated for security)")
+    logger.info(f"Working directory: {working_dir}")
+    logger.info(f"Using gemini at: {gemini_path}")
+    
+    try:
+        result = subprocess.run(
+            full_cmd,
+            capture_output=True,
+            text=True,
+            env=env,
+            cwd=working_dir,
+            timeout=timeout,
+            check=False  # Don't raise exception on non-zero exit
+        )
+        
+        logger.info(f"Gemini command completed with return code: {result.returncode}")
+        if result.stderr and result.returncode != 0:
+            logger.warning(f"Gemini stderr: {result.stderr[:200]}...")
+            
+        return result
+        
+    except subprocess.TimeoutExpired as e:
+        logger.error(f"Gemini command timed out after {timeout} seconds")
+        raise
+    except FileNotFoundError as e:
+        logger.error(f"FileNotFoundError executing gemini: {e}")
+        logger.error(f"Command: {full_cmd}")
+        logger.error(f"Working directory: {working_dir}")
+        logger.error(f"PATH: {env.get('PATH')}")
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error executing gemini: {e}")
+        raise
 
 @server.list_tools()
 async def list_tools() -> List[Tool]:
@@ -202,13 +322,8 @@ Provide a thorough analysis with specific recommendations for improvement."""
         
         prompt = prompts.get(review_type, prompts["general"])
         
-        # Call Gemini CLI
-        result = subprocess.run(
-            ["gemini", "--prompt", prompt], 
-            capture_output=True, 
-            text=True, 
-            timeout=90
-        )
+        # Call Gemini CLI using the robust wrapper
+        result = run_gemini_command(["--prompt", prompt], timeout=90)
         
         if result.returncode == 0:
             return [TextContent(
@@ -216,9 +331,10 @@ Provide a thorough analysis with specific recommendations for improvement."""
                 text=f"✅ Code review completed!\n\nFile: {file_path}\nReview Type: {review_type}\n\nGemini Analysis:\n{result.stdout}"
             )]
         else:
-            return [TextContent(type="text", text=f"❌ Code review failed: {result.stderr}")]
+            return [TextContent(type="text", text=f"❌ Code review failed: {result.stderr or 'Unknown error'}")]
             
     except Exception as e:
+        logger.exception("Error during code review")
         return [TextContent(type="text", text=f"❌ Error during code review: {str(e)}")]
 
 async def generate_tests_handler(args: Dict[str, Any]) -> List[TextContent]:
@@ -255,12 +371,7 @@ Source Code:
 
 Generate complete, runnable test code with proper structure and organization."""
         
-        result = subprocess.run(
-            ["gemini", "--prompt", prompt],
-            capture_output=True,
-            text=True,
-            timeout=120
-        )
+        result = run_gemini_command(["--prompt", prompt], timeout=120)
         
         if result.returncode == 0:
             # Determine test file name based on source file
@@ -296,9 +407,10 @@ Generate complete, runnable test code with proper structure and organization."""
                     text=f"✅ Test cases generated!\n\nSource: {source_file}\nFramework: {test_framework}\nCoverage: {coverage_level}\n\nNote: Could not save to file ({str(e)}), but here are the tests:\n{result.stdout}"
                 )]
         else:
-            return [TextContent(type="text", text=f"❌ Test generation failed: {result.stderr}")]
+            return [TextContent(type="text", text=f"❌ Test generation failed: {result.stderr or 'Unknown error'}")]
             
     except Exception as e:
+        logger.exception("Error generating tests")
         return [TextContent(type="text", text=f"❌ Error generating tests: {str(e)}")]
 
 async def security_audit_handler(args: Dict[str, Any]) -> List[TextContent]:
@@ -350,17 +462,12 @@ Code:
 
 Provide specific security findings with severity levels and remediation recommendations."""
                 
-                result = subprocess.run(
-                    ["gemini", "--prompt", prompt],
-                    capture_output=True,
-                    text=True,
-                    timeout=60
-                )
+                result = run_gemini_command(["--prompt", prompt], timeout=60)
                 
                 if result.returncode == 0:
                     audit_results.append(f"📁 File: {file_path}\n{result.stdout}\n" + "="*80)
                 else:
-                    audit_results.append(f"❌ Failed to audit {file_path}: {result.stderr}")
+                    audit_results.append(f"❌ Failed to audit {file_path}: {result.stderr or 'Unknown error'}")
                     
             except Exception as e:
                 audit_results.append(f"❌ Error reading {file_path}: {str(e)}")
@@ -371,6 +478,7 @@ Provide specific security findings with severity levels and remediation recommen
         )]
         
     except Exception as e:
+        logger.exception("Security audit error")
         return [TextContent(type="text", text=f"❌ Security audit error: {str(e)}")]
 
 async def performance_analysis_handler(args: Dict[str, Any]) -> List[TextContent]:
@@ -408,12 +516,7 @@ Code:
 
 Provide specific performance improvement recommendations with before/after examples where applicable."""
         
-        result = subprocess.run(
-            ["gemini", "--prompt", prompt],
-            capture_output=True,
-            text=True,
-            timeout=90
-        )
+        result = run_gemini_command(["--prompt", prompt], timeout=90)
         
         if result.returncode == 0:
             return [TextContent(
@@ -421,9 +524,10 @@ Provide specific performance improvement recommendations with before/after examp
                 text=f"✅ Performance analysis completed!\n\nFile: {file_path}\nLanguage: {language}\n\nGemini Performance Analysis:\n{result.stdout}"
             )]
         else:
-            return [TextContent(type="text", text=f"❌ Performance analysis failed: {result.stderr}")]
+            return [TextContent(type="text", text=f"❌ Performance analysis failed: {result.stderr or 'Unknown error'}")]
             
     except Exception as e:
+        logger.exception("Performance analysis error")
         return [TextContent(type="text", text=f"❌ Performance analysis error: {str(e)}")]
 
 async def code_quality_report_handler(args: Dict[str, Any]) -> List[TextContent]:
@@ -517,12 +621,7 @@ Please provide a comprehensive analysis covering:
 
 Provide actionable recommendations with priority levels."""
         
-        result = subprocess.run(
-            ["gemini", "--prompt", prompt],
-            capture_output=True,
-            text=True,
-            timeout=150
-        )
+        result = run_gemini_command(["--prompt", prompt], timeout=150)
         
         if result.returncode == 0:
             return [TextContent(
@@ -530,9 +629,10 @@ Provide actionable recommendations with priority levels."""
                 text=f"✅ Code quality report generated!\n\nProject: {project_path}\nMetrics Included: {include_metrics}\n\nGemini Quality Report:\n{result.stdout}"
             )]
         else:
-            return [TextContent(type="text", text=f"❌ Quality report generation failed: {result.stderr}")]
+            return [TextContent(type="text", text=f"❌ Quality report generation failed: {result.stderr or 'Unknown error'}")]
             
     except Exception as e:
+        logger.exception("Quality report error")
         return [TextContent(type="text", text=f"❌ Quality report error: {str(e)}")]
 
 async def ask_gemini_handler(args: Dict[str, Any]) -> List[TextContent]:
@@ -540,18 +640,13 @@ async def ask_gemini_handler(args: Dict[str, Any]) -> List[TextContent]:
     include_all_files = args.get("include_all_files", False)
     
     try:
-        # Build Gemini command
-        cmd = ["gemini", "--prompt", prompt]
+        # Build Gemini command arguments
+        cmd_args = ["--prompt", prompt]
         if include_all_files:
-            cmd.extend(["--all_files"])
+            cmd_args.extend(["--all_files"])
         
-        # Execute Gemini CLI
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            timeout=120
-        )
+        # Execute Gemini CLI using the robust wrapper
+        result = run_gemini_command(cmd_args, timeout=120)
         
         if result.returncode == 0:
             return [TextContent(
@@ -561,15 +656,29 @@ async def ask_gemini_handler(args: Dict[str, Any]) -> List[TextContent]:
         else:
             return [TextContent(
                 type="text",
-                text=f"❌ Gemini Error:\n{result.stderr}"
+                text=f"❌ Gemini Error:\n{result.stderr or 'Unknown error occurred'}"
             )]
             
     except subprocess.TimeoutExpired:
         return [TextContent(type="text", text="⏰ Gemini request timed out")]
+    except FileNotFoundError as e:
+        return [TextContent(type="text", text=f"❌ Gemini CLI not found: {str(e)}")]
     except Exception as e:
+        logger.exception("Error in ask_gemini_handler")
         return [TextContent(type="text", text=f"❌ Error: {str(e)}")]
 
 async def main():
+    # Test Gemini CLI availability on startup
+    try:
+        logger.info("Testing Gemini CLI availability...")
+        result = run_gemini_command(["--version"], timeout=10)
+        if result.returncode == 0:
+            logger.info(f"✅ Gemini CLI is available: {result.stdout.strip()}")
+        else:
+            logger.warning(f"⚠️ Gemini CLI test failed: {result.stderr}")
+    except Exception as e:
+        logger.error(f"❌ Gemini CLI test failed: {str(e)}")
+    
     async with stdio_server() as (read_stream, write_stream):
         await server.run(
             read_stream, 
