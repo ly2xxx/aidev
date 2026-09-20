@@ -306,3 +306,141 @@ Build a three-demo AI Enablement portfolio:
 3. **Agent Evaluation Loop** — based on `langgraph_ollama`
 
 Then add `live-code-advisor` as a private technical case study and use your professional experience to supply the measurable adoption evidence. This would give you a much stronger story than linking to dozens of repositories.
+
+The biggest gap to address
+Your repositories show substantial technical experimentation and implementation, but the job description strongly emphasizes measurable improvements in engineering productivity and delivery value.
+
+The website should therefore include real examples from your professional work, where available:
+
+Time reduced from idea to working implementation
+Test coverage or test creation improvements
+Review defects caught
+Reduction in repetitive engineering effort
+Faster onboarding
+Number of engineers or squads supported
+Adoption rate
+Cycle-time changes
+If you cannot disclose precise figures, use ranges or describe the measurement method. Do not invent metrics from repository activity.
+
+
+Recommended portfolio website
+I would create a new standalone app rather than add this to the existing Task Category Manager. The site should be an interactive technical portfolio, not a repository catalogue.
+
+Page structure
+1. Opening statement
+Something like:
+
+I help engineering teams turn AI experimentation into repeatable software delivery.
+
+Then immediately show four evidence areas:
+
+AI-assisted development
+Agentic workflows
+Context engineering
+Evaluation and quality gates
+2. Interactive demo: Development Crew
+Use aidev as the central demonstration.
+
+The visitor enters a sample request such as:
+
+“Add JWT authentication to a Python API.”
+
+The site then shows a controlled, replayable workflow:
+
+Coordinator interprets the request
+Developer agent proposes an implementation
+Test agent generates test cases
+Review agent identifies risks
+Security agent checks the result
+Final output becomes a pull-request-style report
+This does not need to execute arbitrary code on a public server. A safe demo can use a fixed repository fixture and replay real or curated outputs. That makes it fast, reliable, and safe for an interviewer.
+
+3. Interactive demo: Context Engineering
+Use md-mcp.
+
+Show a small sample project with:
+
+README
+architecture notes
+API conventions
+testing rules
+security guidelines
+Let the visitor ask a question and show:
+
+Which files were selected
+What context was supplied to the model
+The resulting answer
+Why irrelevant files were excluded
+This clearly demonstrates that effective AI adoption depends on context design, not just calling an LLM.
+
+4. Interactive demo: Agent and Evaluation Loop
+Use langgraph_ollama concepts.
+
+Show a visual workflow such as:
+
+Question
+  → Planner
+  → Retriever
+  → Specialist agent
+  → Evidence check
+  → Response
+  → Evaluation result
+
+Include a small evaluation panel:
+
+Answer quality
+Grounding/citation check
+Tool-call success
+Latency
+Failure reason
+If you do not have commercial productivity measurements, label these honestly as demo benchmarks rather than claiming business outcomes.
+
+5. “How I would roll this out to a squad”
+This section is important for the role. Show a practical adoption model:
+
+Identify repetitive engineering work
+Select one squad and one workflow
+Introduce an approved agent pattern
+Add review and security guardrails
+Measure baseline versus assisted delivery
+Document the pattern
+Expand to the next squad
+This demonstrates that you can work with engineers and senior leaders, rather than only build prototypes.
+
+6. Evidence and technical depth
+Each project should have:
+
+Architecture diagram
+Short video or animated walkthrough
+Repository link
+“What I personally built”
+Design trade-offs
+Known limitations
+Test/evaluation approach
+Next production-hardening steps
+The “what I personally built” section is essential, particularly for repositories containing tutorials, forks, or experiments.
+
+What Replit hosting can provide
+A hosted Replit app can support this portfolio as a real interactive website with:
+
+A public live URL
+Frontend and backend workflows
+Server-side API calls
+Encrypted Secrets for model or GitHub credentials
+A database for demo runs, evaluation results, or contact submissions
+A custom domain
+Separate deterministic demo mode and live mode
+Replit’s hosting documentation confirms support for full-stack public applications, managed deployment, encrypted Secrets, databases, and custom domains.
+
+For safety, I would design the public site so that:
+
+Visitors cannot execute arbitrary code
+Visitors cannot access your private repositories
+GitHub credentials never reach browser code
+Live model calls are rate-limited
+Sample repositories are isolated
+The demo still works if an external model provider is unavailable
+For the local-only projects, such as Ollama or desktop microphone workflows, I would not attempt to expose the original machine-level behavior directly. I would either:
+
+Create a hosted, sandboxed version of the core workflow, or
+Create a deterministic replay that shows the real architecture and outputs.
